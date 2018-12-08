@@ -21,9 +21,7 @@ Task("Build")
             Framework = "netstandard2.0",
             Configuration = configuration
         };
-        
 
-        Information(EnvironmentVariable("ALLOW_NUGET_PUSH"));
         DotNetCoreBuild(file.FullPath, buildConfiguration);
     });
 
@@ -34,14 +32,14 @@ Task("Package")
     .WithCriteria(() => isAllowedToPushArtifact)
     .Does(() =>
 {
-    Information("Building version: " + gitInfo.SemVer);
+    Information("Building version number: " + gitInfo.SemVer);    
 
     var nuGetPackSettings = new NuGetPackSettings {
         Version = gitInfo.SemVer,
-        OutputDirectory = "./out/artifacts/"
+        OutputDirectory = "../out/artifacts/"
     };
 
-    var nuspecFiles = GetFiles("./src/OpenTracing.Contrib.Mongo/OpenTracing.Contrib.Mongo.csproj.nuspec");
+    var nuspecFiles = GetFiles("../src/OpenTracing.Contrib.Mongo/OpenTracing.Contrib.Mongo.csproj.nuspec");
     NuGetPack(nuspecFiles, nuGetPackSettings);
 });
 
@@ -55,7 +53,7 @@ Task("Push")
         ApiKey = EnvironmentVariable("NUGET_API_KEY")
     };
 
-    DotNetCoreNuGetPush("out/artifacts/**.nupkg", settings);
+    DotNetCoreNuGetPush("../out/artifacts/**.nupkg", settings);
 });
 
 
