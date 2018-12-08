@@ -2,11 +2,13 @@
 
 This repository contains instrumentation for c# mongodb driver. It is doing instrumentation by hooking into mongo driver's [database command](https://docs.mongodb.com/manual/reference/command/#database-operations) events.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/d0a3cdtik6b8pe6s/branch/master?svg=true)](https://ci.appveyor.com/project/borkke/opentracing-csharp-mongo-6iejj/branch/master) [![OpenTracing Badge](https://img.shields.io/badge/OpenTracing-enabled-blue.svg)](http://opentracing.io)
+
 ## Installation 
 ```
-Install-Package OpenTracing.Borkke.Mongo
+Install-Package OpenTracing.Contrib.Mongo
 or
-dotnet add package OpenTracing.Borkke.Mongo
+dotnet add package OpenTracing.Contrib.Mongo
 ```
 
 ## Usage
@@ -41,7 +43,7 @@ IMongoClient mongoClient = new TracingMongoClient(clientSettings);
 IMongoClient mongoClient = new TracingMongoClient(GlobalTracer.Instance, clientSettings);
 ```
 
-`TracingMongoClient` is instrumenting only default mongo [events](https://github.com/borkke/). This can be changed by passing an optional constructor parameter.
+`TracingMongoClient` is instrumenting only default mongo [events](https://github.com/borkke/opentracing-csharp-mongo/blob/master/src/OpenTracing.Contrib.Mongo/Configuration/DetaultEvents.cs). This can be changed by passing an optional constructor parameter.
 ```c#
 var mongoClient = new TracingMongoClient("<connection string>", options =>
 {
