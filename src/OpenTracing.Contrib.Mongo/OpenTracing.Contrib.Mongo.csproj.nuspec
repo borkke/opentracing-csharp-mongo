@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
-    <id>OpenTracing.Borkke.Mongo</id>
-    <authors>Aleksandar Borkovac</authors>
-    <owners>Aleksandar Borkovac</owners>
+    <id>OpenTracing.Contrib.Mongo</id>
+    <authors>OpenTracing Contributors</authors>
+    <owners>OpenTracing Contributors</owners>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <licenseUrl>https://github.com/borkke/opentracing-csharp-mongo/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/borkke/opentracing-csharp-mongo</projectUrl>

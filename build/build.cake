@@ -53,7 +53,7 @@ Task("Push")
         ApiKey = EnvironmentVariable("NUGET_API_KEY")
     };
 
-    var file = File("../out/artifacts/OpenTracing.Borkke.Mongo." + gitInfo.SemVer +".nupkg");
+    var file = File("../out/artifacts/OpenTracing.Contrib.Mongo." + gitInfo.SemVer +".nupkg");
     DotNetCoreNuGetPush(file.Path.FullPath, settings);
 });
 
