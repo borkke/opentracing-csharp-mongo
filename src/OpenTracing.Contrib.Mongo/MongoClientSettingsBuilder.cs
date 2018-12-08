@@ -53,24 +53,19 @@ namespace OpenTracing.Contrib.Mongo
 
             if (_mongoClientSettings == null) _mongoClientSettings = new MongoClientSettings();
 
-            var tracingOptions = GetTracingOptions();
+            var tracingOptions = new TracongOptions
+            {
+                WhitelistedEvents = DetaultEvents.Events
+            };
+            _options?.Invoke(tracingOptions);
+
             var mongoEventListener = new MongoEventListener(_tracer, tracingOptions);
             SetMongoClientSettings(mongoEventListener);
 
             return _mongoClientSettings;
         }
 
-        private TracongOptions GetTracingOptions()
-        {
-            var tracingOptions = new TracongOptions
-            {
-                WhitelistedEvents = DetaultEvents.Events
-            };
-            _options?.Invoke(tracingOptions);
-            return tracingOptions;
-        }
-
-        public void SetMongoClientSettings(MongoEventListener mongoEventListener)
+        private void SetMongoClientSettings(MongoEventListener mongoEventListener)
         {
             if (_mongoClientSettings.ClusterConfigurator == null)
             {
