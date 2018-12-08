@@ -39,8 +39,8 @@ Task("Package")
         OutputDirectory = "../out/artifacts/"
     };
 
-    var nuspecFiles = GetFiles("../src/OpenTracing.Contrib.Mongo/OpenTracing.Contrib.Mongo.csproj.nuspec");
-    NuGetPack(nuspecFiles, nuGetPackSettings);
+    var nuspecFile = File("../src/OpenTracing.Contrib.Mongo/OpenTracing.Contrib.Mongo.csproj.nuspec");
+    NuGetPack(nuspecFile, nuGetPackSettings);
 });
 
 Task("Push")
@@ -53,7 +53,8 @@ Task("Push")
         ApiKey = EnvironmentVariable("NUGET_API_KEY")
     };
 
-    DotNetCoreNuGetPush("../out/artifacts/**.nupkg", settings);
+    var file = File("../out/artifacts/OpenTracing.Borkke.Mongo." + gitInfo.SemVer +".nupkg");
+    DotNetCoreNuGetPush(file.Path.FullPath, settings);
 });
 
 
