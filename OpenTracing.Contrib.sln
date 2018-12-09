@@ -21,8 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTracing.Contrib.Mongo.T
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{B9A7200A-5DC6-4B62-A161-BB75DADBDC1C}"
 	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
-		build.cake = build.cake
+		build\appveyor.yml = build\appveyor.yml
+		build\build.cake = build\build.cake
 		build.ps1 = build.ps1
 		build.sh = build.sh
 	EndProjectSection

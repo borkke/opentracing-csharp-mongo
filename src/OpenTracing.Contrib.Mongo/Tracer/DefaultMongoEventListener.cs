@@ -14,7 +14,7 @@ namespace OpenTracing.Contrib.Mongo.Tracer
         private readonly EventFilter _eventFilter;
         private readonly ConcurrentDictionary<int, IScope> _scopeCache;
 
-        public MongoEventListener(ITracer tracer, TracongOptions options)
+        public MongoEventListener(ITracer tracer, TracingOptions options)
         {
             _tracer = tracer;
             _eventFilter = new EventFilter(options.WhitelistedEvents);
@@ -75,10 +75,7 @@ namespace OpenTracing.Contrib.Mongo.Tracer
                 .WithTag(Tags.Component, "csharp-mongo")
                 .WithTag(Tags.DbStatement, @event.Command.ToString())
                 .WithTag(Tags.DbInstance, @event.DatabaseNamespace.DatabaseName)
-                //todo:add following tags
-                //.WithTag(Tags.PeerHostname, )
-                //.WithTag(Tags.PeerHost_IPV4/6)
-                //.WithTag(Tags.PeerPort, )
+                .WithTag("db.host", @event.ConnectionId.ToString())
                 .WithTag(Tags.DbType, "mongo");
         }
     }

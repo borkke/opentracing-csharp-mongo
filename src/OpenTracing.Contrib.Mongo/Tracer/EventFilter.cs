@@ -15,6 +15,8 @@ namespace OpenTracing.Contrib.Mongo.Tracer
 
         public bool IsApproved(string eventName)
         {
+            if (_events.Length == 0) return true;
+
             var index = Array.IndexOf(_events, eventName);
             return index >= 0;
         }

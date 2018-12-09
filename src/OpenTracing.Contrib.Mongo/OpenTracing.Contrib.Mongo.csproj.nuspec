@@ -2,11 +2,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>OpenTracing.Contrib.Mongo</id>
-    <authors>OpenTracing Contributors</authors>
-    <owners>OpenTracing Contributors</owners>
+    <authors>Aleksandar Borkovac</authors>
+    <owners>Aleksandar Borkovac</owners>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <licenseUrl>https://github.com/borkke/opentracing-csharp-mongo/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/borkke/opentracing-csharp-mongo</projectUrl>
+    <iconUrl>https://avatars0.githubusercontent.com/u/15482765</iconUrl>
     <description>OpenTracing instrumentation for mongo driver</description>
     <language>en-GB</language>
     <tags>opentracing, mongo, tracing, distributed tracing</tags>

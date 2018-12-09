@@ -43,7 +43,7 @@ IMongoClient mongoClient = new TracingMongoClient(clientSettings);
 IMongoClient mongoClient = new TracingMongoClient(GlobalTracer.Instance, clientSettings);
 ```
 
-`TracingMongoClient` is instrumenting only default mongo [events](https://github.com/borkke/opentracing-csharp-mongo/blob/master/src/OpenTracing.Contrib.Mongo/Configuration/DetaultEvents.cs). This can be changed by passing an optional constructor parameter.
+`TracingMongoClient` is instrumenting all mongo [events](https://github.com/borkke/opentracing-csharp-mongo/blob/master/src/OpenTracing.Contrib.Mongo/Configuration/DetaultEvents.cs). This can be changed by passing an optional constructor parameter.
 ```c#
 var mongoClient = new TracingMongoClient("<connection string>", options =>
 {
