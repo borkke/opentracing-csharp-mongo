@@ -11,7 +11,7 @@ namespace OpenTracing.Contrib.Mongo
     {
         private readonly ITracer _tracer;
         private MongoClientSettings _mongoClientSettings;
-        private Action<TracongOptions> _options;
+        private Action<TracingOptions> _options;
 
         private MongoClientSettingsBuilder(ITracer tracer)
         {
@@ -23,7 +23,7 @@ namespace OpenTracing.Contrib.Mongo
             return new MongoClientSettingsBuilder(tracer);
         }
 
-        internal MongoClientSettingsBuilder WithOptions(Action<TracongOptions> options)
+        internal MongoClientSettingsBuilder WithOptions(Action<TracingOptions> options)
         {
             _options = options;
             return this;
@@ -53,41 +53,21 @@ namespace OpenTracing.Contrib.Mongo
 
             if (_mongoClientSettings == null) _mongoClientSettings = new MongoClientSettings();
 
-            var tracingOptions = new TracongOptions
-            {
-                WhitelistedEvents = DetaultEvents.Events
-            };
+            var tracingOptions = new TracingOptions();
             _options?.Invoke(tracingOptions);
 
             var mongoEventListener = new MongoEventListener(_tracer, tracingOptions);
-            SetMongoClientSettings(mongoEventListener);
+            var clientsConfiguration = _mongoClientSettings.ClusterConfigurator;
+            _mongoClientSettings.ClusterConfigurator = builder =>
+            {
+                builder
+                    .Subscribe<CommandStartedEvent>(mongoEventListener.StartEventHandler)
+                    .Subscribe<CommandSucceededEvent>(mongoEventListener.SuccessEventHandler)
+                    .Subscribe<CommandFailedEvent>(mongoEventListener.ErrorEventHandler);
+                clientsConfiguration?.Invoke(builder);
+            };
 
             return _mongoClientSettings;
-        }
-
-        private void SetMongoClientSettings(MongoEventListener mongoEventListener)
-        {
-            if (_mongoClientSettings.ClusterConfigurator == null)
-            {
-                _mongoClientSettings.ClusterConfigurator = builder => RegisterTracingHandlers(builder, mongoEventListener);
-            }
-            else
-            {
-                var clientsConfiguration = _mongoClientSettings.ClusterConfigurator;
-                _mongoClientSettings.ClusterConfigurator = builder =>
-                {
-                    RegisterTracingHandlers(builder, mongoEventListener);
-                    clientsConfiguration.Invoke(builder);
-                };
-            }
-        }
-
-        private static void RegisterTracingHandlers(ClusterBuilder builder, MongoEventListener mongoEventListener)
-        {
-            builder
-                .Subscribe<CommandStartedEvent>(mongoEventListener.StartEventHandler)
-                .Subscribe<CommandSucceededEvent>(mongoEventListener.SuccessEventHandler)
-                .Subscribe<CommandFailedEvent>(mongoEventListener.ErrorEventHandler);
         }
     }
 }

@@ -35,18 +35,17 @@ namespace TracingMongoClient
             };
             doughnutCollection.InsertOne(doughnut);
 
-            tracer.FinishedSpans().Count.Should().Be(1);
-
             var insertSpan = tracer.FinishedSpans().FirstOrDefault(sp => sp.OperationName.StartsWith("mongodb."));
             insertSpan.Should().NotBeNull();
             insertSpan.OperationName.Should().StartWith("mongodb.");
-            insertSpan.Tags.Count.Should().Be(6);
+            insertSpan.Tags.Count.Should().Be(7);
             insertSpan.Tags.Should().ContainKey(Tags.SpanKind.Key);
             insertSpan.Tags.Should().ContainKey(Tags.Component.Key);
             insertSpan.Tags.Should().ContainKey(Tags.DbStatement.Key);
             insertSpan.Tags.Should().ContainKey(Tags.DbInstance.Key);
             insertSpan.Tags.Should().ContainKey(Tags.DbType.Key);
             insertSpan.Tags.Should().ContainKey("mongodb.reply");
+            insertSpan.Tags.Should().ContainKey("db.host");
         }
 
         [Fact]
@@ -70,9 +69,6 @@ namespace TracingMongoClient
             };
             doughnutCollection.InsertOne(doughnutGreen);
 
-            tracer.FinishedSpans().Count.Should().Be(2);
-            tracer.FinishedSpans().Should().BeInAscendingOrder(a => a.StartTimestamp);
-
             var firstSpan = tracer.FinishedSpans().Last();
             var lastSpan = tracer.FinishedSpans().First();
 
@@ -90,7 +86,7 @@ namespace TracingMongoClient
             var mongoClient = new OpenTracing.Contrib.Mongo.TracingMongoClient(tracer, _fixture.TestMongoDb.ConnectionString);
             var doughnutCollection = _fixture.GetDoughnutCollection(mongoClient);
 
-            using (var scope = tracer.BuildSpan("someWork").StartActive(true))
+            using (var scope = tracer.BuildSpan("parentSpan").StartActive(true))
             {
                 var doughnut = new Doughnut
                 {
@@ -100,16 +96,13 @@ namespace TracingMongoClient
                 doughnutCollection.InsertOne(doughnut);
             }
 
-            tracer.FinishedSpans().Count.Should().Be(2);
+            var insertSpan = tracer.FinishedSpans().FirstOrDefault(span => span.OperationName.Equals("mongodb.insert"));
+            insertSpan.Should().NotBeNull();
 
-            var firstSpan = tracer.FinishedSpans().Last();
-            var lastSpan = tracer.FinishedSpans().First();
+            var parentSpan = tracer.FinishedSpans().FirstOrDefault(span => span.OperationName.Equals("parentSpan"));
+            parentSpan.Should().NotBeNull();
 
-            firstSpan.Should().NotBeNull();
-            lastSpan.Should().NotBeNull();
-
-            firstSpan.ParentId.Should().BeNullOrEmpty();
-            lastSpan.ParentId.Should().Be(firstSpan.Context.SpanId);
+            insertSpan.ParentId.Should().Be(parentSpan.Context.SpanId);
         }
 
         [Fact]
@@ -135,7 +128,8 @@ namespace TracingMongoClient
                 Color = "red"
             });
 
-            tracer.FinishedSpans().Count.Should().Be(1);
+            var finishedSpan = tracer.FinishedSpans().FirstOrDefault(span => span.OperationName.Equals("mongodb.insert"));
+            finishedSpan.Should().NotBeNull();
             testHandler.Counter.Should().BeGreaterOrEqualTo(1);
         }
 
@@ -152,8 +146,6 @@ namespace TracingMongoClient
                 Color = "red"
             };
             doughnutCollection.InsertOne(doughnut);
-
-            tracer.FinishedSpans().Count.Should().Be(1);
 
             var insertSpan = tracer.FinishedSpans().FirstOrDefault(sp => sp.OperationName == "mongodb.insert");
             insertSpan.Should().NotBeNull();
