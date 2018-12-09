@@ -1,8 +1,12 @@
-﻿using FluentAssertions;
+﻿using System.Linq;
+using System.Runtime.InteropServices;
+using FluentAssertions;
 using MongoDB.Driver;
+using OpenTracing;
 using OpenTracing.Contrib.Mongo.Test;
 using OpenTracing.Contrib.Mongo.Test.Model;
 using OpenTracing.Mock;
+using OpenTracing.Util;
 using Xunit;
 
 namespace TracingMongoClient
@@ -30,7 +34,10 @@ namespace TracingMongoClient
                 Color = "red"
             });
 
-            tracer.FinishedSpans().Count.Should().Be(1);
+            tracer
+                .FinishedSpans()
+                .FirstOrDefault(span => span.OperationName.Equals("mongodb.insert"))
+                .Should().NotBeNull();
         }
 
         [Fact]
@@ -47,7 +54,10 @@ namespace TracingMongoClient
                 Color = "red"
             });
 
-            tracer.FinishedSpans().Count.Should().Be(1);
+            tracer
+                .FinishedSpans()
+                .FirstOrDefault(span => span.OperationName.Equals("mongodb.insert"))
+                .Should().NotBeNull();
         }
 
         [Fact]
@@ -64,7 +74,10 @@ namespace TracingMongoClient
                 Color = "red"
             });
 
-            tracer.FinishedSpans().Count.Should().Be(1);
+            tracer
+                .FinishedSpans()
+                .FirstOrDefault(span => span.OperationName.Equals("mongodb.insert"))
+                .Should().NotBeNull();
         }
 
         [Fact]
@@ -81,8 +94,10 @@ namespace TracingMongoClient
                 Color = "red"
             });
 
-            tracer.FinishedSpans().Count.Should().Be(1);
+            tracer
+                .FinishedSpans()
+                .FirstOrDefault(span => span.OperationName.Equals("mongodb.insert"))
+                .Should().NotBeNull();
         }
-
     }
 }
