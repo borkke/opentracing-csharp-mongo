@@ -10,5 +10,6 @@ namespace Samples.Shared
         [BsonElement("color")]
         public string Color { get; set; }
         public int Price { get; set; }
+        public long OwnerId { get; set; }
     }
 }

@@ -1,28 +1,28 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using OpenTracing;
-using OpenTracing.Util;
-using Samples.RestApi.Services;
+using Microsoft.Extensions.Logging;
+using Samples.DoughnutApi.Services;
 using Samples.Shared;
 
-namespace Samples.RestApi.Controllers
+namespace Samples.DoughnutApi.Controllers
 {
     [Route("api/doughnut")]
     [ApiController]
     public class DoughnutController : ControllerBase
     {
+        private readonly ILogger<DoughnutController> _logger;
         private readonly DoughnutService _doughnutService;
-        private readonly ITracer _tracer;
 
-        public DoughnutController()
+        public DoughnutController(ILogger<DoughnutController> logger)
         {
+            _logger = logger;
             _doughnutService = new DoughnutService();
-            _tracer = GlobalTracer.Instance;
         }
 
         [HttpGet]
         public ActionResult<List<Doughnut>> Get()
         {
+            _logger.LogInformation("Getting all doughnuts.");
             var doughnuts = _doughnutService.Get();
             return Ok(doughnuts);
         }
@@ -30,6 +30,7 @@ namespace Samples.RestApi.Controllers
         [HttpGet("{id}")]
         public ActionResult<Doughnut> GetById(string id)
         {
+            _logger.LogInformation("Getting doughnut by {id}.", id);
             var doughnuts = _doughnutService.GetById(id);
             return Ok(doughnuts);
         }
