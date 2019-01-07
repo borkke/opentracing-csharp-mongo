@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Samples.Shared;
 
-namespace Samples.RestApi.Services
+namespace Samples.DoughnutApi.Services
 {
     public class DoughnutService
     {
@@ -36,7 +35,8 @@ namespace Samples.RestApi.Services
                 Builders<Doughnut>.Filter.Eq("_id", new ObjectId(id)),
                 Builders<Doughnut>.Update
                     .Set(a => a.Color, doughnut.Color)
-                    .Set(a => a.Price, doughnut.Price));
+                    .Set(a => a.Price, doughnut.Price)
+                    .Set(a => a.OwnerId, doughnut.OwnerId));
         }
 
         public void Delete(string id)
