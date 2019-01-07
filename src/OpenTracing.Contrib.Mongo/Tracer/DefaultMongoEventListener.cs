@@ -52,6 +52,7 @@ namespace OpenTracing.Contrib.Mongo.Tracer
             if (_scopeCache.TryRemove(@event.RequestId, out var activeScope))
             {
                 activeScope.Span.Log(ExtractExceptionInfo(@event));
+                activeScope.Span.SetTag(Tags.Error, true);
                 activeScope.Dispose();
             }
         }
