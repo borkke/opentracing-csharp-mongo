@@ -12,13 +12,13 @@ namespace OpenTracing.Contrib.Mongo.Tracer
 
         private readonly ITracer _tracer;
         private readonly EventFilter _eventFilter;
-        private readonly ConcurrentDictionary<int, IScope> _scopeCache;
+        private readonly ConcurrentDictionary<int, ISpan> _spanCache;
 
         public MongoEventListener(ITracer tracer, TracingOptions options)
         {
             _tracer = tracer;
             _eventFilter = new EventFilter(options.WhitelistedEvents);
-            _scopeCache = new ConcurrentDictionary<int, IScope>();
+            _spanCache = new ConcurrentDictionary<int, ISpan>();
         }
 
         public void StartEventHandler(CommandStartedEvent @event)
@@ -26,10 +26,10 @@ namespace OpenTracing.Contrib.Mongo.Tracer
             if (!_eventFilter.IsApproved(@event.CommandName))
                 return;
 
-            var scope = BuildNewScopeWithDefaultTags(@event)
-                .StartActive(true);
+            var span = BuildNewSpanWithDefaultTags(@event)
+                .Start();
 
-            _scopeCache.TryAdd(@event.RequestId, scope);
+            _spanCache.TryAdd(@event.RequestId, span);
         }
 
         public void SuccessEventHandler(CommandSucceededEvent @event)
@@ -37,10 +37,10 @@ namespace OpenTracing.Contrib.Mongo.Tracer
             if (!_eventFilter.IsApproved(@event.CommandName))
                 return;
 
-            if (_scopeCache.TryRemove(@event.RequestId, out var activeScope))
+            if (_spanCache.TryRemove(@event.RequestId, out var activeScope))
             {
-                activeScope.Span.SetTag($"{MongoDbPrefix}reply", @event.Reply.ToString());
-                activeScope.Dispose();
+                activeScope.SetTag($"{MongoDbPrefix}reply", @event.Reply.ToString());
+                activeScope.Finish();
             }
         }
 
@@ -49,11 +49,11 @@ namespace OpenTracing.Contrib.Mongo.Tracer
             if (!_eventFilter.IsApproved(@event.CommandName))
                 return;
 
-            if (_scopeCache.TryRemove(@event.RequestId, out var activeScope))
+            if (_spanCache.TryRemove(@event.RequestId, out var span))
             {
-                activeScope.Span.Log(ExtractExceptionInfo(@event));
-                activeScope.Span.SetTag(Tags.Error, true);
-                activeScope.Dispose();
+                span.Log(ExtractExceptionInfo(@event));
+                span.SetTag(Tags.Error, true);
+                span.Finish();
             }
         }
 
@@ -68,7 +68,7 @@ namespace OpenTracing.Contrib.Mongo.Tracer
                 };
         }
 
-        private ISpanBuilder BuildNewScopeWithDefaultTags(CommandStartedEvent @event)
+        private ISpanBuilder BuildNewSpanWithDefaultTags(CommandStartedEvent @event)
         {
             return _tracer
                 .BuildSpan($"{MongoDbPrefix}{@event.CommandName}")
