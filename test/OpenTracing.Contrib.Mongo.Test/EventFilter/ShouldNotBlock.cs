@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using Xunit;
 
 namespace EventFilter
@@ -9,7 +10,8 @@ namespace EventFilter
         public void WhenEventIsWhitelisted()
         {
             var events = new[] { "insert", "find" };
-            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events);
+            var maskedEvents = Array.Empty<string>();
+            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events, maskedEvents);
 
             var isApproved = eventFilter.IsApproved("find");
 
@@ -20,7 +22,8 @@ namespace EventFilter
         public void WhenWhitelistOfEventsIsEmpty()
         {
             string[] emptyListOfEvents = new string[0];
-            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(emptyListOfEvents);
+            var maskedEvents = Array.Empty<string>();
+            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(emptyListOfEvents, maskedEvents);
 
             var isApproved = eventFilter.IsApproved("find");
 
