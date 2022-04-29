@@ -68,3 +68,16 @@ docker run -d --name jaeger \
   -p 9411:9411 \
   jaegertracing/all-in-one:1.7
 ```
+
+## Contributing
+
+### Build 
+```bash
+dotnet build .
+```
+
+### Test
+```bash
+dotnet test .
+```
+

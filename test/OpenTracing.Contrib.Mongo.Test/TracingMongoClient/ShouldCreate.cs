@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Events;
@@ -150,6 +151,50 @@ namespace TracingMongoClient
             var insertSpan = tracer.FinishedSpans().FirstOrDefault(sp => sp.OperationName == "mongodb.insert");
             insertSpan.Should().NotBeNull();
             insertSpan.OperationName.Should().Be("mongodb.insert");
+        }
+
+        [Fact]
+        public void AnInformationSensitiveTagsByDefault()
+        {
+            var tracer = new MockTracer();
+            var mongoClient = new OpenTracing.Contrib.Mongo.TracingMongoClient(tracer, _fixture.TestMongoDb.ConnectionString);
+            var doughnutCollection = _fixture.GetDoughnutCollection(mongoClient);
+
+            var doughnut = new Doughnut
+            {
+                Price = 12,
+                Color = "P@ssword123"
+            };
+            doughnutCollection.InsertOne(doughnut);
+
+            var span = tracer.FinishedSpans().FirstOrDefault(sp => sp.OperationName == "mongodb.insert");
+            span.Should().NotBeNull();
+            var commandValue = span.Tags.GetValueOrDefault("db.statement").ToString();
+            commandValue.Should().Contain("P@ssword123");
+        }
+
+        [Fact]
+        public void AnInformationSensitiveTagsAndMaskTheirValueWhenOptionIsEnabled()
+        {
+            var tracer = new MockTracer();
+            var mongoClient = new OpenTracing.Contrib.Mongo.TracingMongoClient(tracer, _fixture.TestMongoDb.ConnectionString, optiosns =>
+            {
+                optiosns.MasskedEvents = new string[] { "insert" };
+            });
+            var doughnutCollection = _fixture.GetDoughnutCollection(mongoClient);
+
+            var doughnut = new Doughnut
+            {
+                Price = 12,
+                Color = "P@ssword123"
+            };
+            doughnutCollection.InsertOne(doughnut);
+
+            var span = tracer.FinishedSpans().FirstOrDefault(sp => sp.OperationName == "mongodb.insert");
+            span.Should().NotBeNull();
+            var commandValue = span.Tags.GetValueOrDefault("db.statement").ToString();
+            commandValue.Should().NotContain("P@ssword123");
+            commandValue.Should().Contain("*****");
         }
     }
 }

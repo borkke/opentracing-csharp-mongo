@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Linq;
+using FluentAssertions;
 using OpenTracing.Contrib.Mongo.Test;
 using OpenTracing.Contrib.Mongo.Test.Model;
 using OpenTracing.Mock;

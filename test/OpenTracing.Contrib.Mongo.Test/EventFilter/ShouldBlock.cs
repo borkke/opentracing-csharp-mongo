@@ -13,7 +13,8 @@ namespace EventFilter
         public void WhenEventIsNotWhitelisted()
         {
             var events = new[] { "insert", "update" };
-            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events);
+            var maskedEvents = Array.Empty<string>();
+            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events, maskedEvents);
 
             var isApproved = eventFilter.IsApproved("some event");
 
@@ -24,7 +25,8 @@ namespace EventFilter
         public void WhenEventIsNull()
         {
             var events = new[] { "insert", "update" };
-            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events);
+            var maskedEvents = Array.Empty<string>();
+            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events, maskedEvents);
 
             var isApproved = eventFilter.IsApproved(null);
 
@@ -35,7 +37,8 @@ namespace EventFilter
         public void WhenEventIsEmptyString()
         {
             var events = new[] { "insert", "update" };
-            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events);
+            var maskedEvents = Array.Empty<string>();
+            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events, maskedEvents);
 
             var isApproved = eventFilter.IsApproved("");
 

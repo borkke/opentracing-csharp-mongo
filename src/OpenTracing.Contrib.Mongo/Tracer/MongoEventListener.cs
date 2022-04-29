@@ -17,7 +17,7 @@ namespace OpenTracing.Contrib.Mongo.Tracer
         public MongoEventListener(ITracer tracer, TracingOptions options)
         {
             _tracer = tracer;
-            _eventFilter = new EventFilter(options.WhitelistedEvents);
+            _eventFilter = new EventFilter(options.WhitelistedEvents, options.MasskedEvents);
             _spanCache = new ConcurrentDictionary<int, ISpan>();
         }
 
@@ -39,7 +39,13 @@ namespace OpenTracing.Contrib.Mongo.Tracer
 
             if (_spanCache.TryRemove(@event.RequestId, out var activeScope))
             {
-                activeScope.SetTag($"{MongoDbPrefix}reply", @event.Reply.ToString());
+                if(_eventFilter.IsMasked(@event.CommandName))
+                {
+                    activeScope.SetTag($"{MongoDbPrefix}reply", "*****");
+                } else 
+                {
+                    activeScope.SetTag($"{MongoDbPrefix}reply", @event.Reply.ToString());
+                }
                 activeScope.Finish();
             }
         }
@@ -70,14 +76,23 @@ namespace OpenTracing.Contrib.Mongo.Tracer
 
         private ISpanBuilder BuildNewSpanWithDefaultTags(CommandStartedEvent @event)
         {
-            return _tracer
+            var tracer = _tracer
                 .BuildSpan($"{MongoDbPrefix}{@event.CommandName}")
                 .WithTag(Tags.SpanKind, Tags.SpanKindClient)
                 .WithTag(Tags.Component, "csharp-mongo")
-                .WithTag(Tags.DbStatement, @event.Command.ToString())
                 .WithTag(Tags.DbInstance, @event.DatabaseNamespace.DatabaseName)
                 .WithTag("db.host", @event.ConnectionId.ToString())
                 .WithTag(Tags.DbType, "mongo");
+
+            if(_eventFilter.IsMasked(@event.CommandName))
+            {
+                tracer = tracer.WithTag(Tags.DbStatement, "*****");
+            } else 
+            {
+                tracer = tracer.WithTag(Tags.DbStatement, @event.Command.ToString());
+            }
+
+            return tracer;
         }
     }
 }
