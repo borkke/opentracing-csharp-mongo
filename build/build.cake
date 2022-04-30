@@ -63,7 +63,7 @@ Task("Push")
 
         var file = File("../out/artifacts/OpenTracing.Contrib.Mongo." + semVer +".nupkg");
         Information("Pushing to Nuget" + file);
-        //DotNetCoreNuGetPush(file.Path.FullPath, settings);
+        DotNetCoreNuGetPush(file.Path.FullPath, settings);
     });
 
 RunTarget(target);
