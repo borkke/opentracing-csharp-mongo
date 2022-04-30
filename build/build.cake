@@ -1,74 +1,69 @@
-#tool "nuget:?package=GitVersion.CommandLine"
-#tool "nuget:?package=xunit.runner.console"
-
-//Arguments
-var target = Argument("target", "Default");
-var configuration = Argument("configuration", "Release");
+#tool "nuget:?package=GitVersion.CommandLine&version=5.10.1"
+#tool "nuget:?package=xunit.runner.console&version=2.4.1"
 
 var gitInfo = GitVersion();
-var srcProjFiles = GetFiles("../src/**/*.csproj");
-var testProjFiles = GetFiles("../test/**/*.csproj");
+var semVer = gitInfo.SemVer;
+//var semVer = "2.2.2";
+var target = Argument("target", "Push");
+var configuration = Argument("configuration", "Release");
+
+//var isAllowedToPushArtifact = configuration == "Release";
 var isAllowedToPushArtifact = configuration == "Release" && gitInfo.BranchName == "master" && "true" == EnvironmentVariable("ALLOW_NUGET_PUSH");
 
-Task("Restore")
-    .DoesForEach(srcProjFiles, (file) => DotNetCoreRestore(file.FullPath))
-    .DoesForEach(testProjFiles, (file) => DotNetCoreRestore(file.FullPath));
+Task("Clean")
+    .WithCriteria(c => HasArgument("rebuild"))
+    .Does(() =>
+{
+    CleanDirectory($"../src/OpenTracing.Contrib.Mongo/bin/{configuration}");
+});
 
 Task("Build")
-    .DoesForEach(srcProjFiles, (file) => {
-        var buildConfiguration = new DotNetCoreBuildSettings
-        {
-            Framework = "netstandard2.0",
-            Configuration = configuration
-        };
-
-        DotNetCoreBuild(file.FullPath, buildConfiguration);
+    .IsDependentOn("Clean")
+    .Does(() =>
+{
+    DotNetCoreBuild("../OpenTracing.Contrib.sln", new DotNetCoreBuildSettings
+    {
+        Configuration = configuration,
     });
+});
 
-Task("Tests")
-    .DoesForEach(testProjFiles, (file) => DotNetCoreTest(file.FullPath));
+Task("Test")
+    .IsDependentOn("Build")
+    .Does(() =>
+{
+    DotNetCoreTest("../OpenTracing.Contrib.sln", new DotNetCoreTestSettings
+    {
+        Configuration = configuration,
+        NoBuild = true,
+    });
+});
 
 Task("Package")
     .WithCriteria(() => isAllowedToPushArtifact)
-    .Does(() =>
-{
-    Information("Building version number: " + gitInfo.SemVer);    
+    .IsDependentOn("Test")
+    .Does(() => {
+        var nuGetPackSettings = new NuGetPackSettings {
+            Version = semVer,
+            OutputDirectory = "../out/artifacts/"
+        };
 
-    var nuGetPackSettings = new NuGetPackSettings {
-        Version = gitInfo.SemVer,
-        OutputDirectory = "../out/artifacts/"
-    };
-
-    var nuspecFile = File("../src/OpenTracing.Contrib.Mongo/OpenTracing.Contrib.Mongo.csproj.nuspec");
-    NuGetPack(nuspecFile, nuGetPackSettings);
-});
+        var nuspecFile = File("../src/OpenTracing.Contrib.Mongo/OpenTracing.Contrib.Mongo.csproj.nuspec");
+        NuGetPack(nuspecFile, nuGetPackSettings);
+    });
 
 Task("Push")
     .WithCriteria(() => isAllowedToPushArtifact)
-    .Does(() =>
-{
-    var settings = new DotNetCoreNuGetPushSettings
-    {
-        Source = EnvironmentVariable("NUGET_API_SERVER"),
-        ApiKey = EnvironmentVariable("NUGET_API_KEY")
-    };
-
-    var file = File("../out/artifacts/OpenTracing.Contrib.Mongo." + gitInfo.SemVer +".nupkg");
-    DotNetCoreNuGetPush(file.Path.FullPath, settings);
-});
-
-
-Task("BuildAndTest")
-    .IsDependentOn("Restore")
-    .IsDependentOn("Build")
-    .IsDependentOn("Tests");
-
-Task("PackageAndPush")
     .IsDependentOn("Package")
-    .IsDependentOn("Push");
+    .Does(() => {
+        var settings = new DotNetCoreNuGetPushSettings
+        {
+            Source = EnvironmentVariable("NUGET_API_SERVER"),
+            ApiKey = EnvironmentVariable("NUGET_API_KEY")
+        };
 
-Task("Default")
-    .IsDependentOn("BuildAndTest")
-    .IsDependentOn("PackageAndPush");
+        var file = File("../out/artifacts/OpenTracing.Contrib.Mongo." + semVer +".nupkg");
+        Information("Pushing to Nuget" + file);
+        //DotNetCoreNuGetPush(file.Path.FullPath, settings);
+    });
 
 RunTarget(target);
