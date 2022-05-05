@@ -17,7 +17,7 @@ namespace OpenTracing.Contrib.Mongo.Tracer
         public MongoEventListener(ITracer tracer, TracingOptions options)
         {
             _tracer = tracer;
-            _eventFilter = new EventFilter(options.WhitelistedEvents, options.MasskedEvents);
+            _eventFilter = new EventFilter(options.WhitelistedEvents, options.MaskedEvents);
             _spanCache = new ConcurrentDictionary<int, ISpan>();
         }
 

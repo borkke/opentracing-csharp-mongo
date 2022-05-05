@@ -179,7 +179,7 @@ namespace TracingMongoClient
             var tracer = new MockTracer();
             var mongoClient = new OpenTracing.Contrib.Mongo.TracingMongoClient(tracer, _fixture.TestMongoDb.ConnectionString, optiosns =>
             {
-                optiosns.MasskedEvents = new string[] { "insert" };
+                optiosns.MaskedEvents = new string[] { "insert" };
             });
             var doughnutCollection = _fixture.GetDoughnutCollection(mongoClient);
 
