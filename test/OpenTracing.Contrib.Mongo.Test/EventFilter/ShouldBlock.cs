@@ -14,7 +14,8 @@ namespace EventFilter
         {
             var events = new[] { "insert", "update" };
             var maskedEvents = Array.Empty<string>();
-            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events, maskedEvents);
+            var maskedFields = Array.Empty<string>();
+            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events, maskedEvents, maskedFields);
 
             var isApproved = eventFilter.IsApproved("some event");
 
@@ -26,7 +27,8 @@ namespace EventFilter
         {
             var events = new[] { "insert", "update" };
             var maskedEvents = Array.Empty<string>();
-            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events, maskedEvents);
+            var maskedFields = Array.Empty<string>();
+            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events, maskedEvents, maskedFields);
 
             var isApproved = eventFilter.IsApproved(null);
 
@@ -38,7 +40,8 @@ namespace EventFilter
         {
             var events = new[] { "insert", "update" };
             var maskedEvents = Array.Empty<string>();
-            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events, maskedEvents);
+            var maskedFields = Array.Empty<string>();
+            var eventFilter = new OpenTracing.Contrib.Mongo.Tracer.EventFilter(events, maskedEvents, maskedFields);
 
             var isApproved = eventFilter.IsApproved("");
 

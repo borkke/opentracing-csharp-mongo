@@ -8,11 +8,13 @@ namespace OpenTracing.Contrib.Mongo.Tracer
     {
         private readonly string[] _allowedEvents;
         private readonly string[] _masskedEvents;
+        private readonly string[] _maskedFields;
 
-        public EventFilter(string[] allowedEvents, string[] masskedEvents)
+        public EventFilter(string[] allowedEvents, string[] masskedEvents, string[] maskedFields)
         {
             _allowedEvents = allowedEvents;
             _masskedEvents = masskedEvents;
+            _maskedFields = maskedFields;
         }
 
         public bool IsApproved(string eventName)
@@ -23,12 +25,15 @@ namespace OpenTracing.Contrib.Mongo.Tracer
             return index >= 0;
         }
 
-        public bool IsMasked(string eventName)
+        public bool IsMasked(string eventName, string fieldName)
         {
             if (_masskedEvents.Length == 0) return false;
+            if (_maskedFields.Length == 0) return true; //by default we mask
 
-            var index = Array.IndexOf(_masskedEvents, eventName);
-            return index >= 0;
+            var maskedEventsIndex = Array.IndexOf(_masskedEvents, eventName);
+            var maskedFieldsIndex = Array.IndexOf(_maskedFields, fieldName);
+
+            return maskedEventsIndex >= 0 && maskedFieldsIndex >= 0;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace OpenTracing.Contrib.Mongo.Tracer
         public MongoEventListener(ITracer tracer, TracingOptions options)
         {
             _tracer = tracer;
-            _eventFilter = new EventFilter(options.WhitelistedEvents, options.MaskedEvents);
+            _eventFilter = new EventFilter(options.WhitelistedEvents, options.MaskedEvents, options.MaskedFields);
             _spanCache = new ConcurrentDictionary<int, ISpan>();
         }
 
@@ -39,7 +39,8 @@ namespace OpenTracing.Contrib.Mongo.Tracer
 
             if (_spanCache.TryRemove(@event.RequestId, out var activeScope))
             {
-                if(_eventFilter.IsMasked(@event.CommandName))
+                //TODO: Come up with better approach
+                if(_eventFilter.IsMasked(@event.CommandName, $"{MongoDbPrefix}reply"))
                 {
                     activeScope.SetTag($"{MongoDbPrefix}reply", "*****");
                 } else 
@@ -84,7 +85,8 @@ namespace OpenTracing.Contrib.Mongo.Tracer
                 .WithTag("db.host", @event.ConnectionId.ToString())
                 .WithTag(Tags.DbType, "mongo");
 
-            if(_eventFilter.IsMasked(@event.CommandName))
+            //TODO: Come up with better approach
+            if(_eventFilter.IsMasked(@event.CommandName, Tags.DbStatement.Key))
             {
                 tracer = tracer.WithTag(Tags.DbStatement, "*****");
             } else 
