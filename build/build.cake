@@ -2,12 +2,9 @@
 #tool "nuget:?package=xunit.runner.console&version=2.4.1"
 
 var gitInfo = GitVersion();
-var semVer = gitInfo.SemVer;
-//var semVer = "2.2.2";
 var target = Argument("target", "Push");
 var configuration = Argument("configuration", "Release");
 
-//var isAllowedToPushArtifact = configuration == "Release";
 var isAllowedToPushArtifact = configuration == "Release" && gitInfo.BranchName == "master" && "true" == EnvironmentVariable("ALLOW_NUGET_PUSH");
 
 Task("Clean")
@@ -42,8 +39,9 @@ Task("Package")
     .WithCriteria(() => isAllowedToPushArtifact)
     .IsDependentOn("Test")
     .Does(() => {
+        Information("Packaging version: " + gitInfo.SemVer)
         var nuGetPackSettings = new NuGetPackSettings {
-            Version = semVer,
+            Version = gitInfo.SemVer,
             OutputDirectory = "../out/artifacts/"
         };
 
@@ -61,7 +59,7 @@ Task("Push")
             ApiKey = EnvironmentVariable("NUGET_API_KEY")
         };
 
-        var file = File("../out/artifacts/OpenTracing.Contrib.Mongo." + semVer +".nupkg");
+        var file = File("../out/artifacts/OpenTracing.Contrib.Mongo." + gitInfo.SemVer +".nupkg");
         Information("Pushing to Nuget" + file);
         DotNetCoreNuGetPush(file.Path.FullPath, settings);
     });
