@@ -1,6 +1,6 @@
 mode: ContinuousDeployment
 continuous-delivery-fallback-tag: beta
-tag-prefix: ''
+tag-prefix: 'v'
 branches: {}
 ignore:
   sha: []
