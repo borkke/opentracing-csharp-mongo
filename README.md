@@ -43,11 +43,20 @@ IMongoClient mongoClient = new TracingMongoClient(clientSettings);
 IMongoClient mongoClient = new TracingMongoClient(GlobalTracer.Instance, clientSettings);
 ```
 
-`TracingMongoClient` is instrumenting all mongo [events](https://github.com/borkke/opentracing-csharp-mongo/blob/master/src/OpenTracing.Contrib.Mongo/Configuration/DetaultEvents.cs). This can be changed by passing an optional constructor parameter.
+### Customization
+The `TracingMongoClient` allows you to controll what events you want to trace and it allows you to mask (replaced with `******`) some events and fields that might contain sensitive information.
+
+These are [events](https://github.com/borkke/opentracing-csharp-mongo/blob/master/src/OpenTracing.Contrib.Mongo/Configuration/DetaultEvents.cs) that are instrumented by default. There are two properties that you can mask `mongodb.reply` and `db.statement`.
 ```c#
 var mongoClient = new TracingMongoClient("<connection string>", options =>
 {
+    # Only "insert" and "find" events are instrumented
     options.WhitelistedEvents = new[] {"insert", "find"};
+    # Masking
+    # Only "insert" event will be masked
+    optiosns.MaskedEvents = new string[] { "insert" };
+    # For "insert" event, only "mongodb.reply" field will be masked
+    optiosns.MaskedFields = new string[] { "mongodb.reply" };
 });
 ```
 

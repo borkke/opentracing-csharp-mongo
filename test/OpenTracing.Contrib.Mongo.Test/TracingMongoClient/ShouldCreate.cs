@@ -225,5 +225,28 @@ namespace TracingMongoClient
             var replyStatement = span.Tags.GetValueOrDefault("mongodb.reply").ToString();
             replyStatement.Should().Contain("*****");
         }
+
+        [Fact]
+        public void AnInformationSensitiveTagsAndShouldNotMaskAnythingByDefault()
+        {
+            var tracer = new MockTracer();
+            var mongoClient = new OpenTracing.Contrib.Mongo.TracingMongoClient(tracer, _fixture.TestMongoDb.ConnectionString);
+            var doughnutCollection = _fixture.GetDoughnutCollection(mongoClient);
+
+            var doughnut = new Doughnut
+            {
+                Price = 12,
+                Color = "P@ssword123"
+            };
+            doughnutCollection.InsertOne(doughnut);
+
+            var span = tracer.FinishedSpans().FirstOrDefault(sp => sp.OperationName == "mongodb.insert");
+            
+            var dbStatement = span.Tags.GetValueOrDefault("db.statement").ToString();
+            dbStatement.Should().NotContain("*****");
+
+            var replyStatement = span.Tags.GetValueOrDefault("mongodb.reply").ToString();
+            replyStatement.Should().NotContain("*****");
+        }
     }
 }
