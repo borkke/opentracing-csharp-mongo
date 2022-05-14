@@ -39,7 +39,7 @@ Task("Package")
     .WithCriteria(() => isAllowedToPushArtifact)
     .IsDependentOn("Test")
     .Does(() => {
-        Information("Packaging version: " + gitInfo.SemVer)
+        Information("Packaging version: " + gitInfo.SemVer);
         var nuGetPackSettings = new NuGetPackSettings {
             Version = gitInfo.SemVer,
             OutputDirectory = "../out/artifacts/"
